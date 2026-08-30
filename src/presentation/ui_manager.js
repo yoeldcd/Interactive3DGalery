@@ -34,6 +34,64 @@ export class UIManager {
         this.layer.addEventListener('change', (e) => this.handleChange(e));
         this.layer.addEventListener('keydown', (e) => this.handleKeyDown(e));
         this.layer.addEventListener('focusout', (e) => this.handleFocusOut(e));
+        this.layer.addEventListener('dragover', (e) => this.handleDragOver(e));
+        this.layer.addEventListener('drop', (e) => this.handleDrop(e));
+        document.addEventListener('paste', (e) => this.handlePaste(e));
+    }
+
+    canAddPictures() {
+        return this.state.currentMode === 'EDITOR' && Boolean(this.state.selectedRoomId);
+    }
+
+    handleDragOver(e) {
+        if (this.canAddPictures() && Array.from(e.dataTransfer?.items || []).some(item => item.type.startsWith('image/'))) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+    }
+
+    async handleDrop(e) {
+        const files = Array.from(e.dataTransfer?.files || []).filter(file => file.type.startsWith('image/'));
+        if (!this.canAddPictures() || files.length === 0) return;
+
+        e.preventDefault();
+        await this.addPictureFiles(files);
+    }
+
+    async handlePaste(e) {
+        const files = Array.from(e.clipboardData?.items || [])
+            .filter(item => item.type.startsWith('image/'))
+            .map(item => item.getAsFile())
+            .filter(Boolean);
+        if (!this.canAddPictures() || files.length === 0) return;
+
+        e.preventDefault();
+        await this.addPictureFiles(files);
+    }
+
+    async addPictureFiles(files) {
+        const room = this.state.gallery.rooms.find(r => r.id === this.state.selectedRoomId);
+        if (!room) return;
+
+        const startIdx = room.pictures.length;
+        const picturesToLoad = [];
+        for (let i = 0; i < files.length; i++) {
+            try {
+                const src = await readFileAsDataURL(files[i]);
+                picturesToLoad.push({
+                    name: `image${startIdx + i + 1}`,
+                    description: '',
+                    frameColor: '#eab308',
+                    src
+                });
+            } catch (err) {
+                console.error('Error al cargar imagen', err);
+            }
+        }
+
+        if (picturesToLoad.length > 0) {
+            this.state.addPictures(this.state.selectedRoomId, picturesToLoad);
+        }
     }
 
     handleKeyDown(e) {
@@ -318,28 +376,7 @@ export class UIManager {
             async handleChange(e) {
                 const target = e.target;
                 if (target.dataset.action === 'uploadPicture' && target.files.length > 0) {
-                    const files = Array.from(target.files);
-                    const room = this.state.gallery.rooms.find(r => r.id === this.state.selectedRoomId);
-                    let startIdx = room ? room.pictures.length : 0;
-                    
-                    const picturesToLoad = [];
-                    for (let i = 0; i < files.length; i++) {
-                        try {
-                            const src = await readFileAsDataURL(files[i]);
-                            picturesToLoad.push({
-                                name: `image${startIdx + i + 1}`,
-                                description: '',
-                                frameColor: '#eab308',
-                                src: src
-                            });
-                        } catch (err) {
-                            console.error('Error al cargar imagen', err);
-                        }
-                    }
-
-                    if (picturesToLoad.length > 0) {
-                        this.state.addPictures(this.state.selectedRoomId, picturesToLoad);
-                    }
+                    await this.addPictureFiles(Array.from(target.files));
                     target.value = '';
                 } else if (target.dataset.action === 'importGalleryFile' && target.files.length > 0) {
                     const file = target.files[0];

@@ -128,7 +128,7 @@ class AppState {
             if (parsed && Array.isArray(parsed.rooms)) {
                 this.gallery = new Gallery(parsed.id || 'default_gallery', parsed.name || 'Mi Galería Virtual');
                 this.gallery.rooms = parsed.rooms.map(r => {
-                    const room = new GalleryRoom(r.id, r.name, r.description, r.color, r.texture, r.lightColor, r.sound, r.object, r.objectScale);
+                    const room = new GalleryRoom(r.id, r.name, r.description, r.color, r.texture, r.lightColor, r.sound, r.object, r.objectScale, r.soundtrackSrc);
                     room.pictures = (r.pictures || []).map(p => new GalleryPicture(p.id, p.name, p.description, p.frameColor || '#eab308', p.src));
                     return room;
                 });
