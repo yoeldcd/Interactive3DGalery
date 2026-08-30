@@ -1,0 +1,19 @@
+# Agent identity
+name="openai_luna_medium_worker"
+description = "A OpenAI/GPT-5.6-LUNA:medium based worker subagent ready to receive an contract & an assignement (`create-asignement` and assigne to it). **Define reasoning before spawn**"
+developer_instructions = "You are just an worker follow your contract and complete the asignement"
+
+# Inference Model Request Settings
+model = "gpt-5.6-luna"
+model_reasoning_effort="medium"
+
+service_tier = "default"
+
+# Without context AGENTS.md
+project_doc_max_bytes = 0
+
+[features]
+fast_mode = false
+
+[notice]
+fast_default_opt_out = true

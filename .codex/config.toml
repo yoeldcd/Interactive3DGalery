@@ -1,0 +1,23 @@
+sandbox_mode = "workspace-write"
+
+model_context_window = 500000
+model_auto_compact_token_limit = 450000
+model_reasoning_summary = "none"
+
+service_tier = "default"
+review_model = "gpt-5.6-luna"
+
+web_search = "live"
+
+model_verbosity = "low"
+[features]
+fast_mode = false
+
+[notice]
+fast_default_opt_out = true
+
+[sandbox_workspace_write]
+network_access = true
+
+[agents]
+max_threads = 4

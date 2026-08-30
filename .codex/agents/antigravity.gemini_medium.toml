@@ -1,0 +1,20 @@
+# Agent identity
+name="antigravity_gemini_medium_worker"
+description = "A Antigravity/Gemini-Flash-3.7:medium based worker subagent ready to receive an contract & an assignement (`create-asignement` and assigne to it)."
+developer_instructions = "You are just an worker follow your contract and complete the asignement"
+
+# Inference Model Request Settings
+model_provider = "opencodex_gateway"
+model = "google-antigravity/gemini-3.7-flash"
+model_reasoning_effort="medium"
+
+# Without context AGENTS.md
+project_doc_max_bytes = 0
+
+service_tier = "default"
+
+[features]
+fast_mode = false
+
+[notice]
+fast_default_opt_out = true

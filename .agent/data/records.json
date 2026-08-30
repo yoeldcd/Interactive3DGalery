@@ -1,0 +1,60 @@
+{
+  "nextId": 14,
+  "records": [
+    {
+      "id": "rec01",
+      "text": "After context compaction follow recovery protocol running `py {LOCAL_BRAIN_SCRIPT} read protocols.actions.recovery_protocol`.",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec02",
+      "text": "Every failure derivated from working task is UNNACEPTABLE and need to do fixed after task delivery.",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec03",
+      "text": "Mandatory communication channel IS run comand `$CONTENT=@'{CONTENT}'@ | py {LOCAL_BRAIN_SCRIPT} render-message $CONTENT [--task-id {ID}] --authority {AUTH}`.",
+      "created_at": "2026-07-27T10:52:01.250664+00:00"
+    },
+    {
+      "id": "rec04",
+      "text": "DONT STOP the work until deliver a result. When receive instructions during execution take its as guidance.",
+      "created_at": "2026-07-28T13:57:38.213807+00:00"
+    },
+    {
+      "id": "rec05",
+      "text": "No repository modifications, worker deliverables, or code sanitization changes shall be staged (git add / Git index) without user explicit prior review and approval.",
+      "created_at": "2026-08-03T14:32:24.114100+00:00"
+    },
+    {
+      "id": "rec07",
+      "text": "Spawned subagents MUST start with agent_type prefix corresponding to provider. Provider selection order MUST BE determined by QUOTA fallback condition: WHEN THE QUOTA OF FIRST AVAILABLE RAISE LIMIT USE NEXT. Authoritary order is (antigravity_, opencodego_, openai_). The reasoning sufix (_low, _medium, _high, _max) depends on delegated task complexity. Never use default agent_type like `worker`, `explorer`,`default` or empty; That produce selected model & reasoning overryde or herence of your own your model capabilities.",
+      "created_at": "2026-08-04T19:20:39.145172+00:00"
+    },
+    {
+      "id": "rec09",
+      "text": "Spawned subagents MUST start with clean context (fork_context=False) and instructions writes following `read workers.worker_instructing_template` structure",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec10",
+      "text": "Commit messages will be contains entries `- (changetype) [domain] ~ {Technic Description}` for all change groups staged",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec11",
+      "text": "All operative documetation (plan, worker instruct, changelog) will be written on english as native dialect. User interactions (messages, reports) will be in it native language.",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec12",
+      "text": "When you are loss or confused `read protocols.actions.recovery_protocol`",
+      "created_at": "2026-07-27T09:25:27.108204+00:00"
+    },
+    {
+      "id": "rec13",
+      "text": "Mantener continuidad durante toda tarea activa: no detener el trabajo ni cerrar prematuramente mientras existan acciones seguras y ejecutables. Continuar hasta completar, encontrar un bloqueo real que requiera intervención del usuario, o recibir una orden explícita de parar. Al no quedar trabajo ejecutable, devolver el control al usuario para permitir nueva interacción.",
+      "created_at": "2026-08-22T13:36:46.228137+00:00"
+    }
+  ]
+}

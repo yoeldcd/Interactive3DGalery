@@ -1,0 +1,229 @@
+# --------------------------------------------------------------------------- #
+# --- ANGI CODEX COMMAND POLICY --------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# Rules apply only when a command requests execution outside the active
+# sandbox. Routine reads and writes inside the five permitted Brain mirrors do
+# not need allow rules; the filesystem permission profile authorizes them.
+#
+# Decision precedence is: forbidden > prompt > allow.
+
+# --------------------------------------------------------------------------- #
+# --- FORBIDDEN: PERSISTENT ENVIRONMENT AND REGISTRY MUTATION --------------- #
+# --------------------------------------------------------------------------- #
+
+prefix_rule(
+    pattern = ["setx"],
+    decision = "forbidden",
+    justification = "Persistent environment variables must never be modified. Use a process-local variable only when an authorized command requires one.",
+    match = ["setx OPENAI_API_KEY value", "setx PATH value /M"],
+    not_match = ["Get-ChildItem Env:"],
+)
+
+prefix_rule(
+    pattern = ["reg", ["add", "delete", "import", "load", "restore", "save", "unload"]],
+    decision = "forbidden",
+    justification = "Registry mutation is a prohibited system modification.",
+    match = ["reg add HKCU\\Environment /v NAME /d value", "reg delete HKCU\\Environment /v NAME"],
+    not_match = ["reg query HKCU\\Environment"],
+)
+
+prefix_rule(
+    pattern = ["cmd.exe", "/k"],
+    decision = "forbidden",
+    justification = "Persistent interactive command shells outside the sandbox can bypass narrow command rules.",
+    match = ["cmd.exe /k"],
+)
+
+prefix_rule(
+    pattern = ["cmd.exe", "/c"],
+    decision = "forbidden",
+    justification = "CMD is unncesary, harnes provide a safe sandbox for command execution, and CMD can bypass narrow command rules.",
+    match = ["cmd.exe /c"]
+)
+
+prefix_rule(
+    pattern = ["C:\\\\WINDOWS\\\\system32\\\\cmd.exe"],
+    decision = "forbidden",
+    justification = "CMD is unncesary, harnes provide a safe sandbox for command execution, and CMD can bypass narrow command rules.",
+    match = ["C:\\\\WINDOWS\\\\system32\\\\cmd.exe"],
+)
+
+prefix_rule(
+    pattern = [["sc", "sc.exe", "schtasks", "schtasks.exe", "bcdedit", "bcdedit.exe", "diskpart", "diskpart.exe", "format", "format.com", "regsvr32", "regsvr32.exe"]],
+    decision = "forbidden",
+    justification = "Services, scheduled tasks, boot configuration, disks, filesystems, and system component registration must not be modified by Codex.",
+    match = ["sc.exe create example binPath= example.exe", "schtasks.exe /create /tn example /tr example.exe /sc once /st 23:59", "bcdedit.exe /set testsigning on"],
+)
+
+# --------------------------------------------------------------------------- #
+# --- ARBITRARY CODE OUTSIDE THE SANDBOX ------------------------- #
+# --------------------------------------------------------------------------- #
+
+prefix_rule(
+    pattern = [["python", "python.exe", "py"], "-c"],
+    decision = "prompt",
+    justification = "Arbitrary Python outside the sandbox can invoke system APIs and persistent configuration stores.",
+    match = ["python -c print('unsafe outside sandbox')", "py -c print('unsafe outside sandbox')"],
+)
+
+prefix_rule(
+    pattern = [["node", "node.exe"], ["-e", "--eval"]],
+    decision = "prompt",
+    justification = "Arbitrary Node.js outside the sandbox can invoke system APIs and persistent configuration stores.",
+    match = ["node -e console.log('unsafe outside sandbox')", "node --eval console.log('unsafe outside sandbox')"],
+)
+
+# --------------------------------------------------------------------------- #
+# --- SYSTEM MODIFICATION --------------------------- #
+# --------------------------------------------------------------------------- #
+
+prefix_rule(
+    pattern = [["winget", "choco", "scoop"]],
+    decision = "prompt",
+    justification = "Machine and user package-manager changes require explicit package, source, and scope review.",
+    match = ["winget install Git.Git", "choco install git", "scoop install git"],
+)
+
+prefix_rule(
+    pattern = ["git", "config", ["--global", "--system"]],
+    decision = "prompt",
+    justification = "Global and system Git configuration changes require explicit key, value, and scope review.",
+    match = ["git config --global user.name Angi", "git config --system core.autocrlf true"],
+    not_match = ["git config user.name Angi"],
+)
+
+prefix_rule(
+    pattern = [["python", "python.exe", "py"], "-m", "pip", "install"],
+    decision = "prompt",
+    justification = "Pip installations into a user or system interpreter require explicit package and interpreter review.",
+    match = ["python -m pip install requests", "py -m pip install requests"],
+)
+
+prefix_rule(
+    pattern = [["npm", "npm.cmd"], ["install", "i"], ["--global", "-g"]],
+    decision = "prompt",
+    justification = "Global npm installations require explicit package and target toolchain review.",
+    match = ["npm install --global typescript", "npm.cmd i -g typescript"],
+    not_match = ["npm install typescript"],
+)
+
+# --------------------------------------------------------------------------- #
+# --- DANGEROUS OR EXTERNAL-SIDE-EFFECT OPERATIONS ------------------ #
+# --------------------------------------------------------------------------- #
+
+prefix_rule(
+    pattern = ["git", ["reset", "checkout"]],
+    decision = "forbidden",
+    justification = "Git history destructive working-tree changes are prohibited under user strict aprovation.",
+    match = ["git reset --hard HEAD~1", "git checkout"],
+    not_match = ["git status --short", "git diff --check"],
+)
+
+prefix_rule(
+    pattern = ["git", ["commit", "push", "pull", "fetch", "merge", "rebase", "clean", "switch", "restore", "tag"]],
+    decision = "prompt",
+    justification = "Git history, remote state, branch state, or destructive working-tree changes require explicit review.",
+    match = ["git commit -m change", "git push origin main", "git clean -fd"],
+    not_match = ["git status --short", "git diff --check"],
+)
+
+prefix_rule(
+    pattern = [["npm", "npm.cmd", "pnpm", "pnpm.cmd", "yarn", "yarn.cmd"], ["install", "add", "update", "upgrade"]],
+    decision = "prompt",
+    justification = "Dependency changes can execute third-party lifecycle scripts and modify lockfiles; review them before out-of-sandbox execution.",
+    match = ["npm install", "pnpm add react", "yarn upgrade"],
+)
+
+prefix_rule(
+    pattern = [["uv", "uv.exe"], ["sync", "add", "remove", "pip"]],
+    decision = "prompt",
+    justification = "Python dependency and environment changes require review when they request execution outside an authorized workspace sandbox.",
+    match = ["uv sync", "uv add requests", "uv pip install requests"],
+)
+
+prefix_rule(
+    pattern = [["curl", "curl.exe", "wget", "wget.exe"]],
+    decision = "prompt",
+    justification = "Direct network downloads execute outside the normal offline sandbox boundary and require destination review.",
+    match = ["curl.exe https://example.com/file", "wget https://example.com/file"],
+)
+
+prefix_rule(
+    pattern = [["taskkill", "taskkill.exe", "Stop-Process", "Start-Process"]],
+    decision = "prompt",
+    justification = "Starting or stopping persistent processes affects system state and requires explicit review.",
+    match = ["taskkill.exe /PID 1234 /F", "Stop-Process -Id 1234", "Start-Process example.exe"],
+)
+
+prefix_rule(
+    pattern = [["Move-Item", "Rename-Item"]],
+    decision = "prompt",
+    justification = "Moves and renames outside the active workspace boundary require explicit source and destination review.",
+    match = ["Move-Item -LiteralPath source -Destination target", "Rename-Item -LiteralPath source -NewName target"],
+    not_match = ["Get-Item -LiteralPath source", "Get-ChildItem -LiteralPath source"],
+)
+
+prefix_rule(
+    pattern = [["Remove-Item", "rm", "rmdir", "del"], ["-Recurse", "-r", "-rf", "/s"]],
+    decision = "prompt",
+    justification = "Recursive deletion is destructive and requires explicit target review.",
+    match = ["Remove-Item -Recurse target", "rm -rf target", "rmdir /s target"],
+)
+
+# --------------------------------------------------------------------------- #
+# --- ALLOWED INSIDE THE PROFILE; NO OUT-OF-SANDBOX ALLOW RULES ------------- #
+# --------------------------------------------------------------------------- #
+# Read utilities such as rg, Get-Content, Select-String, Get-ChildItem, git
+# status, git diff, git log, and git show run without approval when their paths
+# stay inside the permission profile. Workspace writes such as apply_patch,
+# formatters, tests, builds, and git add are likewise allowed inside the five
+# explicit mirror roots. They intentionally have no `allow` prefix_rule here,
+# because an out-of-sandbox allow would bypass the directory boundary.
+
+
+prefix_rule(
+    pattern = [["apply_patch", "apply_patch.bat"]],
+    decision = "allow",
+    justification = "The Codex patch utility may edit files governed by the active workspace permission profile.",
+    match = ["apply_patch", "apply_patch.bat"],
+)
+
+prefix_rule(
+    pattern = ["cmd.exe", "/c", ["apply_patch", "apply_patch.bat"]],
+    decision = "allow",
+    justification = "The Codex patch wrapper requires cmd.exe on Windows and remains bounded by the active workspace permission profile.",
+    match = ["cmd.exe /c apply_patch", "cmd.exe /c apply_patch.bat"],
+    not_match = [
+        "cmd.exe /c powershell",
+        "cmd.exe /c setx NAME value",
+        "cmd.exe /c del target",
+    ],
+)
+
+# --------------------------------------------------------------------------- #
+# --- AGENT BRAIN CLI ------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# Declares every Brain subcommand exposed by the workspace-local consumer as
+# trusted. The rule remains narrow: a supported Python launcher must be followed
+# immediately by the canonical Brain entry point. On current Codex Desktop for
+# Windows, a known shell-wrapper bug may still request sandbox approval even
+# when execpolicy matches this allow rule; do not broaden this to PowerShell.
+
+prefix_rule(
+    pattern = [["py", "py.exe", "python", "python.exe"], "./$agent/scripts/brain.py"],
+    decision = "allow",
+    justification = "The workspace-local Brain CLI is the trusted control plane for memory, backlog, explorer, avatar, profiles, and all other documented Brain operations.",
+    match = [
+        "py ./$agent/scripts/brain.py get-context --json",
+        "py.exe ./$agent/scripts/brain.py avatar-message hello --json",
+        "py.exe ./$agent/scripts/brain.py avatar-message --stdin-json --json",
+        "python ./$agent/scripts/brain.py show-backlog --json",
+        "python.exe ./$agent/scripts/brain.py list-profiles --json",
+    ],
+    not_match = [
+        "py -c print('arbitrary code')",
+        "python -c print('arbitrary code')",
+        "py another-script.py",
+        "python another-script.py",
+    ],
+)

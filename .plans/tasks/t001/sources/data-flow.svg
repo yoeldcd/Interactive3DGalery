@@ -1,0 +1,237 @@
+<!-- Authorized: root -->
+<!-- 
+    **PLANNING INSTRUCTIONS**
+
+    1 - EXPLORE THE WORKSPACE BEFORE WRITE THIS DOCUMENT:
+
+      - Review your memory `read workflows` search if exist one aplicable to the teask avoiding start a ZERO DOT strategy.
+      - Before write the plan explore the workspace state in alignement with the task requirements and constraints.
+      - Use existing worker under contract `workers.project.project_explorer` as codebase mapper ONLY (NO PLANNING)
+
+    2 - REGISTER ALL EXISTING EVIDENCES:
+    
+      - Document all relevant findings in the `Analysis & Audits` section. 
+
+    3 - COMPOSE THE PLAN DETAILING STEP by STEP ANY ACTION
+      
+      - Declare detailed and unambiguous the exact scope of work, expected deliverables, and validation criteria. Never assumptions or proposals.
+      - Declare optional worker delegations details & contrains.
+      - Write each planning step MUST as self-contained and executable without any external dependencies or assumptions.
+      - For complex or long specifications **DO NOT WRITE SOLELY IN THIS FILE:** create step-specific files in `./documents`.
+    
+    4 - DON'T REMOVE THE COMMENTS TAGs
+
+    **IMPORTANT!!!**
+      - The PLAN design, writing, & execution is your responsibility.
+      - MUST USE exactly the sections structure & formats of this template.
+      - When use manually, copy this document and next fill it.
+-->
+
+# {TASK_ID} — {TASK_TITLE}
+
+**Profile:** `profiles.{MEMORY_PROFILE_NAME}`
+
+## Requirements
+
+<!-- Mandatory section -->
+
+## Functionals Requirements
+
+<!-- Mandatory section -->
+
+Here is exposed all **Functional Requisites FR** on details.
+
+- **FR1:** {unambiguous description of functional requirment outcome}
+- **FR2:** ...
+
+## Non Functionals Requirements
+
+<!-- Mandatory section -->
+
+Here is exposed all **Non Functional Requistes NFR** like (quality, readability, documentation)
+
+- **NFRE1:** {unambiguous description of non functional requirment outcome, e.g: All generated artifact must be readeable & maintenible}
+- **NFRE2:** {role in solution, e.g: All generated artifact must be full documented on the THREE levels}
+
+---
+
+## Analysis & Audits
+
+### Insights
+
+<!-- Mandatory Section (include exploration insights) -->
+
+- **I1:** {detailed declaration of: observed fact, relevant scope boundary, or assumption}
+- **I2:** ...
+
+### Documental Evidence 
+
+<!-- Append if applicable (code, texts, and all non planning direction artifacts) -->
+
+- **DE1:** - `relative/path/to/document1.ext` (BL:EL) — {evidence description}
+- **DE2:** - `relative/path/to/document2.ext` (BL:EL) — {evidence description}
+- ...
+
+### Visual Evidence 
+
+<!-- Mandatory section when planning evidence include (assets images, screenshots, pictures, etc.) -->
+
+#### VE1 - {Visual Name}
+
+![{visual evidence}](./sources/picture.png)
+
+**Description:**
+
+- {visual misaligenement or cohomprensive facts}
+- ...
+
+---
+
+## Proposal
+
+{Selected approach and justification. Include alternatives only when materially relevant.}
+
+### Visuals Design 
+
+<!-- Mandatory section when planning proposal include (mockups, wireframes, diagrams, etc.) -->
+
+#### VD1 - {Proposal Name}
+
+![{proposed designe}](./sources/picture.md)
+
+**Description:**
+
+- {visual fix, improvement or implementation}
+- ...
+
+---
+
+## Resources
+
+<!-- Mandatory section -->
+
+### Specs & Documents 
+
+<!-- Mandatory section if plan depends of (design documents, specifications, etc.) -->
+
+- **DC1:** - `.plans/tasks/{TASK_ID}/documents/name.ext` — {document description}
+- **SP1:** - `.plans/tasks/{TASK_ID}/documents/spec_{SPEC_ID}.md` — {specification description}
+- ...
+
+### Worker Contracts
+
+<!-- Mandatory Seccion when orquestate multiples subagents.  -->
+
+- **C1:** `workers.L.R` — {specialized responsibility}
+- **C2:** `workers.X.Y` — {specialized responsibility}
+- ...
+
+### References
+
+<!-- Mandatory Section (include all existing internal & external references; This section is not for EVIDENCE) -->
+
+- `metodology.orquestation_guidelines`
+- `engineering.A.B`
+- ...
+
+### Reused Elements
+
+<!-- Mandatory Section when existing reusable elements -->
+
+- **RE1:** `{file-path}` → `{element}` — {role in solution}; limitation: {constraint}
+- **RE2:** `{file-path}` → `{element}` — {role in solution}
+- ...
+
+---
+
+## Risks
+
+<!-- Mandatory section -->
+
+- **K1:** {risk condition} → {impact}; mitigation: {strategy}
+- **K2:** ...
+
+## Validation Gates
+
+<!-- Mandatory validation gates declaration -->
+
+- **V1:** {check} → {passing condition}
+- **V2:** {check} → {passing condition}
+- ...
+
+---
+
+## Steps Specification 
+
+<!-- For long complexity steps the content on this section can be split in `documents/step_{STEP_ID}.md` files. Each following same items shape -->
+
+```markdown
+### S{N} — {Step Title}
+
+<!-- Mandatory Steep Specification Structure for each Steep on the plan -->
+
+- **Satisfies:** FR{X}, NFR{Y}
+- **Depends:** S{X}
+- **Validation:** V{X}, V{Y}
+
+### Inputs
+
+<!-- Mandatory Section when modified some element -->
+
+- **S{N}-IN1:** `{file-path}[(BL:FL)]` → `{elementName}` — {intended responsibility after modification}
+- **S{N}-IN2:** `{file-path}[(BL:FL)]` → `{elementName}` — {intended responsibility after modification}
+- ...
+
+### Outputs:
+
+<!-- Mandatory Sub-section (all steep include inputs and outputs, the outputs of an steep can be the input of other) -->
+
+- **S{N}-OUT1:** `{file-path}[(BL:FL)]` → `{element}` — {spected output description}
+- **S{N}-OUT2:** `{file-path}[(BL:FL)]` → `{element}` — {spected output description}
+- ...
+
+### Actions
+
+<!-- Mandatory Sub-Section -->
+
+Desglose at attomic level of all required actions, including inpuths procedure outputs and responsible executor.
+
+**Action Types Signatures**: REVIEW `REV`, MODIFICATION `MOD`, ADITION `ADD`, INTEGRATION `INT`, VALIDATION `VAL`, CLEANINNG `CLN`, DOCUMENTATION `DOC`
+**Action State**: COMPLETED `CPT`, PARTIAL `PTL`, BLOCKED `BLK`
+
+|  Action |        Description      |  Depends  |     Inputs      |  Outputs   |         Contribution        | Agent:Contract |
+| ------- | ----------------------- | --------- | --------------- | ---------  | --------------------------- | -------------- |
+| `REV-1` | {change or improvement} |     ~     | `S1-OUT1`       | `S1-OUT1`  |  {justify to step/goal/req} |  `W-EXP1`:`C1` |
+| `MOD-1` | {change or improvement} |  `REV-1`  | `S1-IN1`, `RE1` | `S1-OUT2`  |  {justify to step/goal/req} |  `W-EDT1`:`C2` |
+| `VAL-1` | {change or improvement} |  `MOD-1`  | `S1-OUT1`       | `S1-OUT3`  |  {justify to step/goal/req} |  `W-AUD1`:`C3` |
+...
+
+```
+(Repeat for each step S{N} in the plan)
+
+-----------------------------------------------------------------------------------------------------------------------
+
+## Execution Progress
+
+<!-- Mandatory Document Section. DON'T remove. Can be isolated as `progress.md` file -->
+
+- [ ] **S1** — {step outcome}: {link to step-specific file if applicable e.g. `.documents/step_S1.md`} 
+  - [ ] **S1.1** — {substep outcome}: {link to step-specific file if applicable e.g. `.documents/step_S1_1.md`}
+- [ ] **S2** — {step outcome} 
+- [ ] **S3** — {step outcome}
+  - [ ] **S3.1** — {substep outcome}
+  - [ ] **S3.2** — {substep outcome}
+- [ ] **S{N}** — {step outcome}
+
+## Execution History
+
+<!-- Mandatory Document Section. DON'T remove -->
+
+This section is more important because bring you contextual work traceability of all technical decision taken during the work execution. You are responsible to maintain this table updated.
+
+**Entries Format**: `| (DD-MM-YYYY HH:MM) | S{x}-{A} | {emmiter} | {event type} | {event description} |`
+**Event Type**: ASIGNED TO: `ASM W{X}`, COMPLETED: `CPT`, PARTIAL: `PTL`, BLOCKED: `BLK`, FAILURE `FAIL`, OBSERVATION `OBS`, MODIFIED `MOD`, INCLUSION `INC`.
+
+|    timestamp       | Steep-Action  | emitter |  Event Type  |    Description      | 
+| ------------------ | ------ | -------------- | ------------ | ------------------- |
+| (DD-MM-YYYY HH:MM) | `S{x}-{A}` | `ORQ`/`W-{W}` | {event type} | {event description} |

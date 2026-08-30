@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Topología procedural del modo Espectador</title>
+  <desc id="desc">Pasillo central con salones poligonales alternados, puertas abiertas, vestíbulos, cuadros en paredes y pedestal central.</desc>
+  <rect width="1200" height="720" fill="#ffffff"/>
+  <text x="600" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#111827">Mundo Espectador — vista superior</text>
+  <rect x="505" y="80" width="190" height="580" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="4"/>
+  <path d="M520 105V635 M680 105V635" stroke="#93c5fd" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="600" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#1e3a8a">PASILLO PRINCIPAL</text>
+
+  <!-- left room 1 -->
+  <polygon points="445,105 345,70 245,105 205,200 245,290 345,325 445,290 485,200" fill="#f8fafc" stroke="#1d4ed8" stroke-width="4"/>
+  <rect x="445" y="173" width="60" height="54" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="445" y="158" text-anchor="end" font-family="Arial" font-size="16" font-weight="700" fill="#111827">Salón Geometría</text>
+  <circle cx="345" cy="200" r="28" fill="#dbeafe" stroke="#1d4ed8" stroke-width="3"/>
+  <text x="345" y="206" text-anchor="middle" font-family="Arial" font-size="13" fill="#1e3a8a">OBJ</text>
+  <g fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2">
+    <rect x="278" y="86" width="44" height="20"/><rect x="216" y="163" width="20" height="44"/>
+    <rect x="271" y="291" width="48" height="20"/><rect x="374" y="291" width="48" height="20"/>
+    <rect x="454" y="238" width="20" height="40"/><rect x="370" y="88" width="44" height="20"/>
+  </g>
+
+  <!-- right room 2 -->
+  <polygon points="755,265 855,230 955,265 995,360 955,450 855,485 755,450 715,360" fill="#f8fafc" stroke="#1d4ed8" stroke-width="4"/>
+  <rect x="695" y="333" width="60" height="54" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="755" y="318" text-anchor="start" font-family="Arial" font-size="16" font-weight="700" fill="#111827">Salón Fotografía</text>
+  <circle cx="855" cy="360" r="28" fill="#dbeafe" stroke="#1d4ed8" stroke-width="3"/>
+  <text x="855" y="366" text-anchor="middle" font-family="Arial" font-size="13" fill="#1e3a8a">OBJ</text>
+  <g fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2">
+    <rect x="788" y="246" width="44" height="20"/><rect x="898" y="246" width="44" height="20"/>
+    <rect x="964" y="323" width="20" height="44"/><rect x="891" y="451" width="48" height="20"/>
+    <rect x="784" y="451" width="48" height="20"/><rect x="726" y="397" width="20" height="40"/>
+  </g>
+
+  <!-- left room 3 -->
+  <polygon points="445,430 355,395 265,430 225,515 265,600 355,635 445,600 485,515" fill="#f8fafc" stroke="#1d4ed8" stroke-width="4"/>
+  <rect x="445" y="488" width="60" height="54" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+  <text x="445" y="475" text-anchor="end" font-family="Arial" font-size="16" font-weight="700" fill="#111827">Salón Arte Digital</text>
+  <circle cx="355" cy="515" r="28" fill="#dbeafe" stroke="#1d4ed8" stroke-width="3"/>
+  <text x="355" y="521" text-anchor="middle" font-family="Arial" font-size="13" fill="#1e3a8a">OBJ</text>
+
+  <!-- avatar and direction -->
+  <circle cx="600" cy="150" r="17" fill="#f59e0b" stroke="#92400e" stroke-width="3"/>
+  <path d="M600 175V235" stroke="#f59e0b" stroke-width="7" stroke-linecap="round"/>
+  <path d="M600 238l-14-24h28z" fill="#f59e0b"/>
+  <text x="625" y="157" font-family="Arial" font-size="14" fill="#92400e">Avatar 3ª persona</text>
+
+  <g font-family="Arial" font-size="15" fill="#334155">
+    <text x="70" y="675">N lados = N cuadros</text>
+    <text x="315" y="675">Entrada abierta en un vértice</text>
+    <text x="775" y="675">Salones alternados y separados por radio envolvente</text>
+  </g>
+</svg>
