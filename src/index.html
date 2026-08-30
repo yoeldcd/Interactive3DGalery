@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería 3D Interactiva</title>
+    <!-- Tailwind CSS para el diseño UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Map para Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <!-- Estilos personalizados y animaciones -->
+    <link rel="stylesheet" href="./presentation/styles/gallery_styles.css">
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="crosshair"></div>
+    <div id="minimap-container">
+        <div id="minimap-header">MAPA DE SALONES</div>
+        <canvas id="minimap-canvas" width="210" height="210"></canvas>
+    </div>
+    <div id="ui-layer"></div>
+
+    <!-- Bootstrap de la aplicación modular -->
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
