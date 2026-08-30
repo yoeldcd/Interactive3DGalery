@@ -8,8 +8,9 @@ export class ConfirmDialog {
      * Muestra un cuadro de confirmación modal.
      * @param {string} message - Mensaje o pregunta a confirmar.
      * @param {Function} [onConfirm] - Callback ejecutado si el usuario acepta.
+     * @param {Function} [onCancel] - Callback ejecutado si el usuario cancela o rechaza.
      */
-    static show(message, onConfirm) {
+    static show(message, onConfirm, onCancel) {
         const existing = document.getElementById('confirm-dialog-wrapper');
         if (existing) existing.remove();
 
@@ -40,6 +41,7 @@ export class ConfirmDialog {
 
         document.getElementById('btn-confirm-no')?.addEventListener('click', () => {
             document.getElementById('confirm-dialog-wrapper')?.remove();
+            if (onCancel) onCancel();
         });
 
         document.getElementById('btn-confirm-yes')?.addEventListener('click', () => {

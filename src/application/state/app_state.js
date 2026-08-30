@@ -20,21 +20,34 @@ class AppState {
         this.onSpectatorEnter = () => {};
     }
 
-    async loadInitialData() {
-        let savedGallery = await this.repository.get('default_gallery');
-        if (!savedGallery) {
-            this.gallery = new Gallery();
-            const room1 = new GalleryRoom(null, 'Sala Renacimiento', 'Colección de arte clásico de maestros europeos.', '#ece8e1', null, '#fff5ea', null, null, 1.0);
-            const room2 = new GalleryRoom(null, 'Sala Vanguardia', 'Exploraciones contemporáneas, abstracciones y formas modernas.', '#2b2d42', null, '#8ecae6', null, null, 1.0);
-            this.gallery.rooms.push(room1, room2);
-            await this.repository.save(this.gallery);
-        } else {
-            this.gallery = savedGallery;
-        }
+    async hasSavedData() {
+        const savedGallery = await this.repository.get('default_gallery');
+        return Boolean(savedGallery);
+    }
+
+    async loadDefaultGallery() {
+        this.gallery = new Gallery();
+        const room1 = new GalleryRoom(null, 'Sala Renacimiento', 'Colección de arte clásico de maestros europeos.', '#ece8e1', null, '#fff5ea', null, null, 1.0);
+        const room2 = new GalleryRoom(null, 'Sala Vanguardia', 'Exploraciones contemporáneas, abstracciones y formas modernas.', '#2b2d42', null, '#8ecae6', null, null, 1.0);
+        this.gallery.rooms.push(room1, room2);
         if (this.gallery.rooms.length > 0) {
             this.selectedRoomId = this.gallery.rooms[0].id;
         }
+        await this.repository.save(this.gallery);
         this.notify();
+    }
+
+    async loadInitialData() {
+        let savedGallery = await this.repository.get('default_gallery');
+        if (!savedGallery) {
+            await this.loadDefaultGallery();
+        } else {
+            this.gallery = savedGallery;
+            if (this.gallery.rooms.length > 0) {
+                this.selectedRoomId = this.gallery.rooms[0].id;
+            }
+            this.notify();
+        }
     }
 
     async save() {

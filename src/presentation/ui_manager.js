@@ -198,8 +198,81 @@ export class UIManager {
         PictureEditModal.bindEvents();
     }
 
-    showConfirmDialog(message, onConfirm) {
-        ConfirmDialog.show(message, onConfirm);
+    showConfirmDialog(message, onConfirm, onCancel) {
+        ConfirmDialog.show(message, onConfirm, onCancel);
+    }
+
+    async syncGallery({ isInitial = false, onComplete = null } = {}) {
+        this.showLoading('Buscando galery.json en el servidor...');
+        try {
+            let res = await fetch('galery.json');
+            if (!res.ok) {
+                res = await fetch('gallery.json');
+            }
+            if (!res.ok) {
+                this.hideLoading();
+                if (!isInitial) {
+                    this.showInfoModal('Archivo no encontrado', 'No se pudo encontrar el archivo "galery.json" en el servidor (HTTP ' + res.status + ').');
+                }
+                if (onComplete) onComplete(false);
+                return false;
+            }
+            const text = await res.text();
+            let parsed = null;
+            try {
+                parsed = JSON.parse(text);
+            } catch (e) {
+                this.hideLoading();
+                if (!isInitial) {
+                    this.showInfoModal('Error de formato', 'El archivo "galery.json" no es un JSON válido.');
+                }
+                if (onComplete) onComplete(false);
+                return false;
+            }
+
+            if (!parsed || !Array.isArray(parsed.rooms)) {
+                this.hideLoading();
+                if (!isInitial) {
+                    this.showInfoModal('Datos Inválidos', 'El archivo "galery.json" no contiene una estructura de galería válida.');
+                }
+                if (onComplete) onComplete(false);
+                return false;
+            }
+            this.hideLoading();
+
+            const roomsCount = parsed.rooms.length;
+            const galleryName = parsed.name || 'Galería';
+            const question = isInitial
+                ? `Se detectó el archivo de galería "${galleryName}" con ${roomsCount} salón(es) en el servidor. ¿Deseas importar esta galería para comenzar?`
+                : `Se validó el archivo "${galleryName}" con ${roomsCount} salón(es). ¿Deseas reemplazar la galería actual con estos datos?`;
+
+            this.showConfirmDialog(
+                question,
+                async () => {
+                    this.showLoading('Sincronizando galería...');
+                    try {
+                        await this.state.importGallery(text);
+                        this.hideLoading();
+                        if (onComplete) onComplete(true);
+                    } catch (err) {
+                        this.hideLoading();
+                        this.showInfoModal('Error de Sincronización', err.message || 'Error al aplicar los datos de la galería.');
+                        if (onComplete) onComplete(false);
+                    }
+                },
+                () => {
+                    if (onComplete) onComplete(false);
+                }
+            );
+            return true;
+        } catch (err) {
+            this.hideLoading();
+            if (!isInitial) {
+                this.showInfoModal('Error de Sincronización', 'No se pudo conectar o leer el archivo galery.json: ' + err.message);
+            }
+            if (onComplete) onComplete(false);
+            return false;
+        }
     }
 
     showLoading(text = 'Cargando...') {
@@ -280,42 +353,7 @@ export class UIManager {
                     const targetRoomId = btn.dataset.roomId || (targetMode === 'SPECTATOR' && this.state.currentMode === 'EDITOR' ? this.state.selectedRoomId : null);
                     this.state.setMode(targetMode, targetRoomId);
                 } else if (action === 'syncGallery') {
-                    this.showLoading('Buscando galery.json en el servidor...');
-                    try {
-                        let res = await fetch('galery.json');
-                        if (!res.ok) {
-                            res = await fetch('gallery.json');
-                        }
-                        if (!res.ok) {
-                            this.hideLoading();
-                            this.showInfoModal('Archivo no encontrado', 'No se pudo encontrar el archivo "galery.json" en el servidor (HTTP ' + res.status + ').');
-                            return;
-                        }
-                        const text = await res.text();
-                        const parsed = JSON.parse(text);
-                        if (!parsed || !Array.isArray(parsed.rooms)) {
-                            this.hideLoading();
-                            this.showInfoModal('Datos Inválidos', 'El archivo "galery.json" no contiene una estructura de galería válida.');
-                            return;
-                        }
-                        this.hideLoading();
-
-                        const roomsCount = parsed.rooms.length;
-                        const galleryName = parsed.name || 'Galería';
-                        this.showConfirmDialog(`Se validó el archivo "${galleryName}" con ${roomsCount} salón(es). ¿Deseas reemplazar la galería actual con estos datos?`, async () => {
-                            this.showLoading('Sincronizando galería...');
-                            try {
-                                await this.state.importGallery(text);
-                                this.hideLoading();
-                            } catch (err) {
-                                this.hideLoading();
-                                this.showInfoModal('Error de Sincronización', err.message || 'Error al aplicar los datos de la galería.');
-                            }
-                        });
-                    } catch (err) {
-                        this.hideLoading();
-                        this.showInfoModal('Error de Sincronización', 'No se pudo conectar o leer el archivo galery.json: ' + err.message);
-                    }
+                    await this.syncGallery();
                 } else if (action === 'exportGallery') {
                     this.showConfirmDialog('¿Deseas exportar la galería actual a un archivo JSON descargable?', () => {
                         this.showLoading('Generando archivo JSON...');

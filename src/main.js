@@ -22,8 +22,22 @@ export class MainApp {
      */
     async start() {
         try {
-            await this.state.loadInitialData();
-            this.state.setMode('START');
+            const hasData = await this.state.hasSavedData();
+            if (!hasData) {
+                // Arrancando de cero sin DB previa: sincronización automática desde galery.json si existe
+                await this.ui.syncGallery({
+                    isInitial: true,
+                    onComplete: async (synced) => {
+                        if (!synced) {
+                            await this.state.loadDefaultGallery();
+                        }
+                        this.state.setMode('START');
+                    }
+                });
+            } else {
+                await this.state.loadInitialData();
+                this.state.setMode('START');
+            }
         } catch (error) {
             console.error("Error al iniciar la aplicación:", error);
             const uiLayer = document.getElementById('ui-layer');
