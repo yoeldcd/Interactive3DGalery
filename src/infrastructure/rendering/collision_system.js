@@ -197,35 +197,36 @@ class CollisionSystem {
     }
 
     /**
-     * Actualiza la posición a velocidad constante (sin aceleración ni inercia) y resuelve colisiones con sub-stepping.
+     * Actualiza la posición a velocidad constante y resuelve colisiones de forma 100% independiente del framerate.
      * @param {object} params
      * @returns {void}
      */
     updateMovement({ camera, controls, velocity, direction, moveForward, moveBackward, turnLeft, turnRight, delta, playerRadius = 0.45 }) {
-        const dTime = Math.min(delta, 0.05);
+        const dt = Math.min(Math.max(delta, 0.0), 0.25);
+        if (dt <= 0) return;
 
-        // Control de giro a velocidad angular constante
+        // Control de giro a velocidad angular constante e independiente de FPS
         const turnSpeed = 0.95;
         const isTurningLeft = Boolean(turnLeft);
         const isTurningRight = Boolean(turnRight);
 
         const euler = new THREE.Euler(0, 0, 0, 'YXZ');
         euler.setFromQuaternion(camera.quaternion);
-        if (isTurningLeft) euler.y += turnSpeed * dTime;
-        if (isTurningRight) euler.y -= turnSpeed * dTime;
+        if (isTurningLeft) euler.y += turnSpeed * dt;
+        if (isTurningRight) euler.y -= turnSpeed * dt;
         euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, euler.x));
         euler.z = 0;
         camera.quaternion.setFromEuler(euler);
         camera.rotation.copy(euler);
         camera.updateMatrixWorld();
 
-        // Desplazamiento lineal a velocidad constante (sin aceleración ni inercia)
-        const walkSpeed = 4.8;
+        // Desplazamiento lineal exacto proporcional al tiempo transcurrido (9.6 m/s)
+        const walkSpeed = 9.6;
         let moveDir = 0;
         if (moveForward) moveDir += 1;
         if (moveBackward) moveDir -= 1;
 
-        const totalDisplacement = moveDir * walkSpeed * dTime;
+        const totalDisplacement = moveDir * walkSpeed * dt;
         const playerObj = controls.getObject ? controls.getObject() : camera;
 
         if (Math.abs(totalDisplacement) > 1e-5) {

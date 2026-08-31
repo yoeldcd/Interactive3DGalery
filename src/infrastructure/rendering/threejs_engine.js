@@ -200,7 +200,13 @@ class ThreeJSEngine {
                     prevTouchX = touch.clientX;
                     prevTouchY = touch.clientY;
 
-                    const sensitivity = 0.0020;
+                    // Curva de aceleración táctil progresiva:
+                    // Precisión en gestos lentos y rotación acelerada ágil en deslizamientos rápidos
+                    const touchDist = Math.hypot(deltaX, deltaY);
+                    const accel = 1.0 + Math.min(2.8, Math.pow(touchDist / 10.0, 1.2));
+                    const baseSensitivity = 0.0022;
+                    const sensitivity = baseSensitivity * accel;
+
                     lookEuler.setFromQuaternion(this.camera.quaternion);
                     lookEuler.y -= deltaX * sensitivity;
                     lookEuler.x -= deltaY * sensitivity;
@@ -335,7 +341,7 @@ class ThreeJSEngine {
         requestAnimationFrame(() => this.animate());
 
         const time = performance.now();
-        const delta = Math.min((time - this.prevTime) / 1000, 0.1);
+        const delta = Math.min(Math.max((time - this.prevTime) / 1000, 0), 0.25);
 
         const playerX = this.camera.position.x;
         const playerZ = this.camera.position.z;
@@ -470,7 +476,7 @@ class ThreeJSEngine {
                 this.bobTimer += delta * 12.0;
                 this.bobOffset = Math.sin(this.bobTimer) * 0.045;
             } else {
-                this.bobOffset = THREE.MathUtils.lerp(this.bobOffset, 0, delta * 10.0);
+                this.bobOffset = THREE.MathUtils.lerp(this.bobOffset, 0, 1.0 - Math.exp(-10.0 * delta));
             }
             this.camera.position.y = this.baseCameraY + this.bobOffset;
         }
