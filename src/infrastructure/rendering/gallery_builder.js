@@ -604,6 +604,8 @@ zCenter + (doorWidth / 2 + 0.2)
 
 this.roomList.push({
 id: room.id,
+name: room.name || '',
+description: room.description || '',
 x: roomCenterX,
 z: roomCenterZ,
 doorX: doorEntranceX,

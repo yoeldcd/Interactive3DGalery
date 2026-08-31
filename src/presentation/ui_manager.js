@@ -29,6 +29,12 @@ export class UIManager {
         this.state.onStateChange = () => this.render();
         this.state.onSpectatorEnter = (targetRoomId) => this.enterSpectatorMode(targetRoomId);
         this.engine.onLookAtPicture = (data) => this.updateHUD(data);
+        this.engine.onRoomChange = (room) => {
+            const titleEl = document.getElementById('spectator-current-title');
+            if (titleEl) {
+                titleEl.innerText = room && room.name ? room.name : 'PASILLO CENTRAL';
+            }
+        };
 
         this.layer.addEventListener('click', (e) => this.handleClick(e));
         this.layer.addEventListener('change', (e) => this.handleChange(e));
@@ -334,6 +340,16 @@ export class UIManager {
 
         if (data && descText.length > 0) {
             const descEl = document.getElementById('hud-desc');
+            const typeLabel = document.getElementById('hud-type-label');
+
+            if (typeLabel) {
+                if (data.type === 'room') {
+                    typeLabel.innerText = data.name ? data.name : 'Descripción del Salón';
+                } else {
+                    typeLabel.innerText = (data.name && data.name.trim().length > 0) ? data.name : 'Obra de Arte';
+                }
+            }
+
             if (descEl) descEl.innerText = descText;
             hud.classList.remove('opacity-0', 'translate-y-4', '-translate-y-3');
             hud.classList.add('opacity-100', 'translate-y-0');

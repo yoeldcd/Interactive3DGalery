@@ -86,6 +86,7 @@ class ThreeJSEngine {
         };
 
         this.onLookAtPicture = null;
+        this.onRoomChange = null;
 
         this.currentInsideRoom = null;
         this.roomAudioElements = {};
@@ -182,6 +183,7 @@ class ThreeJSEngine {
                     touchLookId = touch.identifier;
                     prevTouchX = touch.clientX;
                     prevTouchY = touch.clientY;
+                    if (e.cancelable) e.preventDefault();
                     break;
                 }
             }
@@ -192,6 +194,7 @@ class ThreeJSEngine {
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const touch = e.changedTouches[i];
                 if (touch.identifier === touchLookId) {
+                    if (e.cancelable) e.preventDefault();
                     const deltaX = touch.clientX - prevTouchX;
                     const deltaY = touch.clientY - prevTouchY;
                     prevTouchX = touch.clientX;
@@ -216,15 +219,16 @@ class ThreeJSEngine {
                 const touch = e.changedTouches[i];
                 if (touch.identifier === touchLookId) {
                     touchLookId = null;
+                    if (e.cancelable) e.preventDefault();
                     break;
                 }
             }
         };
 
-        window.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: true });
-        window.addEventListener('touchend', onTouchEnd, { passive: true });
-        window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+        window.addEventListener('touchstart', onTouchStart, { passive: false });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd, { passive: false });
+        window.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
         window.addEventListener('resize', () => {
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
@@ -338,6 +342,7 @@ class ThreeJSEngine {
         const hw = this.minimapLayout ? (this.minimapLayout.hallWidth / 2) : 3.2;
 
         let insideRoom = null;
+        let doorNearRoom = null;
 
         for (let i = 0; i < this.roomList.length; i++) {
             const r = this.roomList[i];
@@ -346,9 +351,16 @@ class ThreeJSEngine {
 
             if (distToCenter <= r.radius + 1.2 || inCorridor) {
                 insideRoom = r;
-                break;
+            }
+
+            // Proximidad a la puerta del salón desde el pasillo
+            const distToDoor = Math.hypot(playerX - r.doorX, playerZ - r.doorZ);
+            if (distToDoor <= 3.2) {
+                doorNearRoom = r;
             }
         }
+
+        this.currentDoorNearRoom = doorNearRoom;
 
         if (insideRoom !== this.currentInsideRoom) {
             if (this.currentInsideRoom && this.currentInsideRoom.soundtrackSrc) {
@@ -370,6 +382,9 @@ class ThreeJSEngine {
             }
 
             this.currentInsideRoom = insideRoom;
+            if (this.onRoomChange) {
+                this.onRoomChange(insideRoom);
+            }
         }
 
         this.camera.updateMatrixWorld(true);
@@ -460,7 +475,27 @@ class ThreeJSEngine {
             this.camera.position.y = this.baseCameraY + this.bobOffset;
         }
 
-        this.raycasterManager.update(this.camera, this.onLookAtPicture);
+        let pictureTargetData = null;
+        this.raycasterManager.update(this.camera, (data) => {
+            pictureTargetData = data;
+        });
+
+        if (this.onLookAtPicture) {
+            if (pictureTargetData) {
+                this.onLookAtPicture({
+                    ...pictureTargetData,
+                    type: 'picture'
+                });
+            } else if (!insideRoom && doorNearRoom && doorNearRoom.description && doorNearRoom.description.trim().length > 0) {
+                this.onLookAtPicture({
+                    type: 'room',
+                    name: doorNearRoom.name,
+                    description: doorNearRoom.description
+                });
+            } else {
+                this.onLookAtPicture(null);
+            }
+        }
 
         const minimapInterval = (navigator.maxTouchPoints > 0) ? 66 : 33;
         if (time - this.lastMinimapUpdate > minimapInterval) {

@@ -18,21 +18,31 @@ export class SpectatorLayout {
 
         return `
                     <div class="w-full h-full relative pointer-events-none flex flex-col justify-between p-4 sm:p-6">
-                        <div class="flex justify-between items-center w-full pointer-events-auto relative z-30 gap-2">
-                            <div class="h-9 sm:h-10 bg-slate-900/80 backdrop-blur-md px-3.5 sm:px-4 rounded-xl border border-slate-700/60 shadow-lg flex items-center gap-2.5 max-w-[50%] sm:max-w-none">
-                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></div>
-                                <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">${galleryName}</span>
+                        <div class="flex flex-col w-full pointer-events-auto relative z-30 gap-2">
+                            <!-- Fila 1: Nombre de la Galería General a la izquierda y controles a la derecha -->
+                            <div class="flex justify-between items-center w-full gap-2">
+                                <div class="h-9 sm:h-10 bg-slate-900/80 backdrop-blur-md px-3.5 sm:px-4 rounded-xl border border-slate-700/60 shadow-lg flex items-center gap-2.5 max-w-[50%] sm:max-w-none">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></div>
+                                    <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">${galleryName}</span>
+                                </div>
+
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <button data-action="setMode" data-mode="EDITOR" class="h-9 sm:h-10 px-3 sm:px-4 bg-slate-900/85 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 rounded-xl backdrop-blur-md transition text-xs font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
+                                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        <span>ESTUDIO</span>
+                                    </button>
+                                    <button data-action="setMode" data-mode="START" class="h-9 sm:h-10 px-3 sm:px-4 bg-slate-900/85 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 rounded-xl backdrop-blur-md transition text-xs font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
+                                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                        <span>INICIO</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="flex items-center gap-2 flex-shrink-0">
-                                <button data-action="setMode" data-mode="EDITOR" class="h-9 sm:h-10 px-3 sm:px-4 bg-slate-900/85 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 rounded-xl backdrop-blur-md transition text-xs font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
-                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    <span>ESTUDIO</span>
-                                </button>
-                                <button data-action="setMode" data-mode="START" class="h-9 sm:h-10 px-3 sm:px-4 bg-slate-900/85 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/60 rounded-xl backdrop-blur-md transition text-xs font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
-                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                                    <span>INICIO</span>
-                                </button>
+                            <!-- Fila 2: Nombre del Salón actual donde se encuentra el usuario -->
+                            <div id="spectator-top-title-container" class="flex justify-center w-full pointer-events-none mt-0.5">
+                                <div class="h-8 sm:h-9 px-4 sm:px-6 bg-slate-900/90 backdrop-blur-md rounded-xl border border-amber-400/40 shadow-xl flex items-center justify-center pointer-events-auto max-w-[92%] sm:max-w-md">
+                                    <span id="spectator-current-title" class="text-[11px] sm:text-xs md:text-sm font-extrabold text-white uppercase tracking-wider truncate text-center">PASILLO CENTRAL</span>
+                                </div>
                             </div>
                         </div>
 
@@ -100,15 +110,15 @@ export class SpectatorLayout {
                         <!-- Cruceta / Palanca virtual en la derecha -->
                         ${VirtualDPad.render()}
 
-                        <!-- HUD de descripción de obra (Arriba en móviles con margen aumentado y height variable, abajo en escritorio) -->
-                        <div class="fixed sm:absolute top-20 sm:top-auto sm:bottom-6 left-3.5 right-3.5 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-30 pointer-events-none flex justify-center">
-                            <div id="info-hud" class="w-full sm:w-[50dvw] sm:max-w-xl h-auto max-h-44 sm:max-h-56 bg-slate-950/90 sm:bg-black/50 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 text-white shadow-2xl opacity-0 transform -translate-y-3 sm:translate-y-4 transition-all duration-300 pointer-events-none flex flex-col justify-start">
+                        <!-- HUD de descripción (Con fuente legible y margen adecuado) -->
+                        <div class="fixed sm:absolute top-28 sm:top-auto sm:bottom-6 left-3.5 right-3.5 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-30 pointer-events-none flex justify-center">
+                            <div id="info-hud" class="w-full sm:w-[50dvw] sm:max-w-xl h-auto max-h-48 sm:max-h-60 bg-slate-950/95 sm:bg-black/60 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 text-white shadow-2xl opacity-0 transform -translate-y-3 sm:translate-y-4 transition-all duration-300 pointer-events-none flex flex-col justify-start">
                                 <div class="flex items-center gap-2 mb-1.5 flex-shrink-0">
-                                    <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#facc15]"></span>
-                                    <span class="text-[11px] sm:text-xs font-black text-amber-400 uppercase tracking-widest drop-shadow-sm">Descripción de la Obra</span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#facc15] flex-shrink-0"></span>
+                                    <span id="hud-type-label" class="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-wide drop-shadow-sm truncate">Título de la Obra</span>
                                 </div>
-                                <div class="overflow-y-auto max-h-32 sm:max-h-40 pr-1">
-                                    <p id="hud-desc" class="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed drop-shadow"></p>
+                                <div class="overflow-y-auto max-h-36 sm:max-h-44 pr-1">
+                                    <p id="hud-desc" class="text-[13px] sm:text-base text-slate-100 font-medium leading-relaxed drop-shadow"></p>
                                 </div>
                             </div>
                         </div>

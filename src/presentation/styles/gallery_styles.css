@@ -6,27 +6,45 @@
 body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+    position: fixed;
     background-color: #050505;
     font-family: 'Inter', sans-serif;
     user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #canvas-container {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
     z-index: 1;
+}
+
+#canvas-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none;
 }
 
 #ui-layer {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
     z-index: 10;
     pointer-events: none;
 }
@@ -177,11 +195,11 @@ body, html {
     position: absolute;
     bottom: 16px;
     left: 16px;
-    width: 116px;
-    height: 116px;
+    width: 162px;
+    height: 162px;
     background: rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -199,9 +217,9 @@ body, html {
 
 #minimap-header {
     position: absolute;
-    top: 6px;
-    left: 8px;
-    font-size: 7px;
+    top: 8px;
+    left: 10px;
+    font-size: 8.5px;
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -214,15 +232,15 @@ body, html {
     #minimap-container {
         bottom: 24px;
         left: 24px;
-        width: 180px;
-        height: 180px;
-        border-radius: 18px;
+        width: 250px;
+        height: 250px;
+        border-radius: 22px;
     }
 
     #minimap-header {
-        top: 8px;
-        left: 12px;
-        font-size: 9px;
+        top: 10px;
+        left: 14px;
+        font-size: 11px;
         letter-spacing: 0.12em;
     }
 }
@@ -384,5 +402,12 @@ body, html {
     #dpad-base {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* Ocultar cruceta en pantallas de escritorio con ratón y teclado */
+@media (min-width: 1024px), (pointer: fine) and (hover: hover) {
+    #virtual-dpad-container {
+        display: none !important;
     }
 }
