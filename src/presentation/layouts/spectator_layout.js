@@ -125,38 +125,41 @@ export class SpectatorLayout {
     static bindEvents({ engine, onStartTour }) {
         const btnStart = document.getElementById('btn-start-tour');
         const overlay = document.getElementById('click-to-play-overlay');
+        const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
-        const startTour = () => {
+        const startTour = (isTouch = false) => {
             if (onStartTour) onStartTour();
             if (overlay) overlay.style.display = 'none';
             engine.isSpectatorActive = true;
-            try {
-                engine.controls.lock();
-            } catch (e) {
-                // Pointer lock puede no estar disponible en dispositivos móviles
+            if (!isTouch && !isTouchDevice()) {
+                try {
+                    engine.controls.lock();
+                } catch (e) {
+                    // Pointer lock no disponible
+                }
             }
         };
 
         if (btnStart) {
             btnStart.addEventListener('click', (e) => {
                 e.stopPropagation();
-                startTour();
+                startTour(e.pointerType === 'touch');
             });
             btnStart.addEventListener('touchend', (e) => {
                 e.stopPropagation();
-                startTour();
+                startTour(true);
             });
         }
 
         if (overlay) {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
-                    startTour();
+                    startTour(e.pointerType === 'touch');
                 }
             });
             overlay.addEventListener('touchend', (e) => {
                 if (e.target === overlay) {
-                    startTour();
+                    startTour(true);
                 }
             });
         }

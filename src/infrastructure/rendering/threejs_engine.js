@@ -26,15 +26,15 @@ class ThreeJSEngine {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x0f172a);
 
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 150);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.2, 120);
         this.camera.position.set(0, 1.7, 4);
 
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             powerPreference: 'high-performance',
-            precision: 'mediump'
+            precision: 'highp'
         });
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = false;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -235,6 +235,17 @@ class ThreeJSEngine {
 
         window.addEventListener('pointerdown', (e) => {
             if (e.target.closest('button, input, textarea, select, a, label, #modal-container, #virtual-dpad-container')) {
+                return;
+            }
+
+            // En dispositivos / eventos táctiles ('touch'), NO bloquear el cursor para no interferir con la cruceta o gestos táctiles
+            if (e.pointerType === 'touch' || navigator.maxTouchPoints > 0) {
+                const minimap = document.getElementById('minimap-container');
+                if (minimap && minimap.style.display !== 'none') {
+                    const overlay = document.getElementById('click-to-play-overlay');
+                    if (overlay) overlay.style.display = 'none';
+                    this.isSpectatorActive = true;
+                }
                 return;
             }
 

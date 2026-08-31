@@ -649,132 +649,204 @@ this.collisionSystem.addSegmentCollider(corrStartX, zCenter - doorWidth / 2, roo
 }
 
 buildPictureOnWall(picData, wallMesh, maxWallWidth, hallHeight, wallNumber, wallThick, roomPicMeshes = null) {
-if (!picData || !picData.src) {
-return;
-}
-
-const frameThick = 0.14;
-const maxW = maxWallWidth * 0.72;
-const maxH = hallHeight * 0.58;
-const zOffset = (wallThick / 2) + (frameThick / 2) + 0.005;
-
-const frameColor = picData.frameColor || '#eab308';
-const frameMat = new THREE.MeshStandardMaterial({
-color: new THREE.Color(frameColor),
-roughness: 0.35,
-metalness: 0.25
-});
-
-const frameExtraBottom = 0.58;
-const frameExtraTop = 0.32;
-const frameExtraSide = 0.36;
-
-let w = Math.min(3.4, maxW);
-let h = Math.min(2.4, maxH);
-
-const frameMesh = new THREE.Mesh(
-new THREE.BoxGeometry(w + frameExtraSide, h + frameExtraTop + frameExtraBottom, frameThick),
-frameMat
-);
-frameMesh.position.set(0, 0, zOffset);
-
-const picY = (frameExtraBottom - frameExtraTop) / 2;
-const picGeo = new THREE.PlaneGeometry(w, h);
-const picMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-const picMesh = new THREE.Mesh(picGeo, picMat);
-picMesh.position.set(0, picY, frameThick / 2 + 0.005);
-
-picMesh.userData = {
-isPicture: true,
-name: picData.name || 'Obra de Arte',
-description: picData.description || ''
-};
-
-const pCanvas = document.createElement('canvas');
-pCanvas.width = 512;
-pCanvas.height = 100;
-const pCtx = pCanvas.getContext('2d');
-pCtx.fillStyle = '#0f172a';
-pCtx.fillRect(0, 0, 512, 100);
-pCtx.strokeStyle = '#facc15';
-pCtx.lineWidth = 6;
-pCtx.strokeRect(4, 4, 504, 92);
-
-pCtx.fillStyle = '#f8fafc';
-pCtx.font = 'bold 36px Inter, sans-serif';
-pCtx.textAlign = 'center';
-pCtx.textBaseline = 'middle';
-let displayTitle = picData.name || 'Sin título';
-if (displayTitle.length > 22) {
-displayTitle = displayTitle.substring(0, 20) + '…';
-}
-pCtx.fillText(displayTitle, 256, 50);
-
-const pTex = new THREE.CanvasTexture(pCanvas);
-pTex.colorSpace = THREE.SRGBColorSpace;
-const plaqueMat = new THREE.MeshStandardMaterial({
-map: pTex,
-roughness: 0.3,
-metalness: 0.2
-});
-
-let plaqueW = Math.min(w * 0.85, 2.2);
-let plaqueH = Math.max(0.24, plaqueW * (100 / 512));
-const plaqueGeo = new THREE.PlaneGeometry(plaqueW, plaqueH);
-const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
-const plaqueY = picY - (h / 2) - (plaqueH / 2 + 0.08);
-plaqueMesh.position.set(0, plaqueY, frameThick / 2 + 0.006);
-plaqueMesh.userData = picMesh.userData;
-
-frameMesh.add(picMesh);
-frameMesh.add(plaqueMesh);
-wallMesh.add(frameMesh);
-if (roomPicMeshes) {
-roomPicMeshes.push(picMesh);
-roomPicMeshes.push(plaqueMesh);
-}
-
-this.assetLoader.textureLoader.setCrossOrigin('anonymous');
-this.assetLoader.textureLoader.load(
-picData.src,
-(tex) => {
-tex.colorSpace = THREE.SRGBColorSpace;
-tex.needsUpdate = true;
-picMat.map = tex;
-picMat.needsUpdate = true;
-
-const img = tex.image;
-if (img && img.width && img.height) {
-const aspect = img.width / img.height;
-let newW = maxW;
-let newH = newW / aspect;
-if (newH > maxH) {
-newH = maxH;
-newW = newH * aspect;
-}
-
-frameMesh.geometry.dispose();
-frameMesh.geometry = new THREE.BoxGeometry(newW + frameExtraSide, newH + frameExtraTop + frameExtraBottom, frameThick);
-
-const updatedPicY = (frameExtraBottom - frameExtraTop) / 2;
-picMesh.geometry.dispose();
-picMesh.geometry = new THREE.PlaneGeometry(newW, newH);
-picMesh.position.set(0, updatedPicY, frameThick / 2 + 0.005);
-
-const updatedPlaqueW = Math.min(newW * 0.85, 2.2);
-const updatedPlaqueH = Math.max(0.24, updatedPlaqueW * (100 / 512));
-plaqueMesh.geometry.dispose();
-plaqueMesh.geometry = new THREE.PlaneGeometry(updatedPlaqueW, updatedPlaqueH);
-plaqueMesh.position.set(0, updatedPicY - (newH / 2) - (updatedPlaqueH / 2 + 0.08), frameThick / 2 + 0.006);
-}
-},
-undefined,
-(err) => {
-console.warn('Error al cargar imagen del cuadro:', picData.src, err);
-}
-);
-
+    if (!picData || !picData.src) {
+        return;
     }
+
+    const maxW = maxWallWidth * 0.72;
+    const maxH = hallHeight * 0.58;
+
+    const frameDepth = 0.08;      // Relieve y profundidad del marco
+    const moldingWidth = 0.12;    // Ancho de las molduras perimetrales
+    const zBase = (wallThick / 2) + (frameDepth / 2) + 0.005;
+
+    const frameColor = picData.frameColor || '#eab308';
+    const frameMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(frameColor),
+        roughness: 0.32,
+        metalness: 0.35
+    });
+
+    const passepartoutMat = new THREE.MeshStandardMaterial({
+        color: 0x111827,
+        roughness: 0.85,
+        metalness: 0.05
+    });
+
+    let w = Math.min(3.4, maxW);
+    let h = Math.min(2.4, maxH);
+
+    const frameGroup = new THREE.Group();
+    frameGroup.position.set(0, 0, zBase);
+
+    // 1. Tablero de fondo (Passepartout / Backing plate)
+    const backplateMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(w + moldingWidth * 2, h + moldingWidth * 2, 0.02),
+        passepartoutMat
+    );
+    backplateMesh.position.set(0, 0, -frameDepth / 2 + 0.01);
+    frameGroup.add(backplateMesh);
+
+    // 2. Las 4 molduras perimetrales que forman el marco 3D hueco en relieve
+    const topMolding = new THREE.Mesh(
+        new THREE.BoxGeometry(w + moldingWidth * 2, moldingWidth, frameDepth),
+        frameMat
+    );
+    topMolding.position.set(0, h / 2 + moldingWidth / 2, 0);
+
+    const bottomMolding = new THREE.Mesh(
+        new THREE.BoxGeometry(w + moldingWidth * 2, moldingWidth, frameDepth),
+        frameMat
+    );
+    bottomMolding.position.set(0, -h / 2 - moldingWidth / 2, 0);
+
+    const leftMolding = new THREE.Mesh(
+        new THREE.BoxGeometry(moldingWidth, h, frameDepth),
+        frameMat
+    );
+    leftMolding.position.set(-w / 2 - moldingWidth / 2, 0, 0);
+
+    const rightMolding = new THREE.Mesh(
+        new THREE.BoxGeometry(moldingWidth, h, frameDepth),
+        frameMat
+    );
+    rightMolding.position.set(w / 2 + moldingWidth / 2, 0, 0);
+
+    frameGroup.add(topMolding);
+    frameGroup.add(bottomMolding);
+    frameGroup.add(leftMolding);
+    frameGroup.add(rightMolding);
+
+    // 3. El lienzo de la obra (encajado dentro de la cavidad del marco 3D)
+    const picGeo = new THREE.PlaneGeometry(w, h);
+    const picMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.FrontSide
+    });
+    const picMesh = new THREE.Mesh(picGeo, picMat);
+    picMesh.position.set(0, 0, -frameDepth / 2 + 0.022);
+
+    picMesh.userData = {
+        isPicture: true,
+        name: picData.name || 'Obra de Arte',
+        description: picData.description || ''
+    };
+    frameGroup.add(picMesh);
+
+    // 4. Placa de título con su propio marco miniatura
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = 512;
+    pCanvas.height = 100;
+    const pCtx = pCanvas.getContext('2d');
+    pCtx.fillStyle = '#0f172a';
+    pCtx.fillRect(0, 0, 512, 100);
+    pCtx.strokeStyle = '#facc15';
+    pCtx.lineWidth = 6;
+    pCtx.strokeRect(4, 4, 504, 92);
+
+    pCtx.fillStyle = '#f8fafc';
+    pCtx.font = 'bold 36px Inter, sans-serif';
+    pCtx.textAlign = 'center';
+    pCtx.textBaseline = 'middle';
+    let displayTitle = picData.name || 'Sin título';
+    if (displayTitle.length > 22) {
+        displayTitle = displayTitle.substring(0, 20) + '…';
+    }
+    pCtx.fillText(displayTitle, 256, 50);
+
+    const pTex = new THREE.CanvasTexture(pCanvas);
+    pTex.colorSpace = THREE.SRGBColorSpace;
+    const plaqueMat = new THREE.MeshStandardMaterial({
+        map: pTex,
+        roughness: 0.3,
+        metalness: 0.2
+    });
+
+    let plaqueW = Math.min(w * 0.85, 2.2);
+    let plaqueH = Math.max(0.24, plaqueW * (100 / 512));
+
+    const plaqueBaseMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(plaqueW + 0.06, plaqueH + 0.04, 0.03),
+        frameMat
+    );
+    const plaqueY = -h / 2 - moldingWidth - (plaqueH / 2 + 0.12);
+    plaqueBaseMesh.position.set(0, plaqueY, 0);
+
+    const plaqueGeo = new THREE.PlaneGeometry(plaqueW, plaqueH);
+    const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
+    plaqueMesh.position.set(0, plaqueY, 0.018);
+    plaqueMesh.userData = picMesh.userData;
+
+    frameGroup.add(plaqueBaseMesh);
+    frameGroup.add(plaqueMesh);
+
+    wallMesh.add(frameGroup);
+    if (roomPicMeshes) {
+        roomPicMeshes.push(picMesh);
+        roomPicMeshes.push(plaqueMesh);
+    }
+
+    // 5. Carga de textura y ajuste proporcional dinámico
+    this.assetLoader.textureLoader.setCrossOrigin('anonymous');
+    this.assetLoader.textureLoader.load(
+        picData.src,
+        (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.needsUpdate = true;
+            picMat.map = tex;
+            picMat.needsUpdate = true;
+
+            const img = tex.image;
+            if (img && img.width && img.height) {
+                const aspect = img.width / img.height;
+                let newW = maxW;
+                let newH = newW / aspect;
+                if (newH > maxH) {
+                    newH = maxH;
+                    newW = newH * aspect;
+                }
+
+                backplateMesh.geometry.dispose();
+                backplateMesh.geometry = new THREE.BoxGeometry(newW + moldingWidth * 2, newH + moldingWidth * 2, 0.02);
+
+                topMolding.geometry.dispose();
+                topMolding.geometry = new THREE.BoxGeometry(newW + moldingWidth * 2, moldingWidth, frameDepth);
+                topMolding.position.set(0, newH / 2 + moldingWidth / 2, 0);
+
+                bottomMolding.geometry.dispose();
+                bottomMolding.geometry = new THREE.BoxGeometry(newW + moldingWidth * 2, moldingWidth, frameDepth);
+                bottomMolding.position.set(0, -newH / 2 - moldingWidth / 2, 0);
+
+                leftMolding.geometry.dispose();
+                leftMolding.geometry = new THREE.BoxGeometry(moldingWidth, newH, frameDepth);
+                leftMolding.position.set(-newW / 2 - moldingWidth / 2, 0, 0);
+
+                rightMolding.geometry.dispose();
+                rightMolding.geometry = new THREE.BoxGeometry(moldingWidth, newH, frameDepth);
+                rightMolding.position.set(newW / 2 + moldingWidth / 2, 0, 0);
+
+                picMesh.geometry.dispose();
+                picMesh.geometry = new THREE.PlaneGeometry(newW, newH);
+
+                const updatedPlaqueW = Math.min(newW * 0.85, 2.2);
+                const updatedPlaqueH = Math.max(0.24, updatedPlaqueW * (100 / 512));
+                const updatedPlaqueY = -newH / 2 - moldingWidth - (updatedPlaqueH / 2 + 0.12);
+
+                plaqueBaseMesh.geometry.dispose();
+                plaqueBaseMesh.geometry = new THREE.BoxGeometry(updatedPlaqueW + 0.06, updatedPlaqueH + 0.04, 0.03);
+                plaqueBaseMesh.position.set(0, updatedPlaqueY, 0);
+
+                plaqueMesh.geometry.dispose();
+                plaqueMesh.geometry = new THREE.PlaneGeometry(updatedPlaqueW, updatedPlaqueH);
+                plaqueMesh.position.set(0, updatedPlaqueY, 0.018);
+            }
+        },
+        undefined,
+        (err) => {
+            console.warn('Error al cargar imagen del cuadro:', picData.src, err);
+        }
+    );
+}
 }
 
 export { GalleryBuilder };
