@@ -197,36 +197,57 @@ class CollisionSystem {
     }
 
     /**
-     * Actualiza la posición aplicando rotación, fricción, aceleración y resolución de colisiones.
+     * Actualiza la posición aplicando rotación, fricción, aceleración y resolución de colisiones con sub-stepping.
      * @param {object} params
      * @returns {void}
      */
-    updateMovement({ camera, controls, velocity, direction, moveForward, moveBackward, turnLeft, turnRight, delta, playerRadius }) {
-        const dTime = Math.min(delta, 0.1);
+    updateMovement({ camera, controls, velocity, direction, moveForward, moveBackward, turnLeft, turnRight, delta, playerRadius = 0.45 }) {
+        const dTime = Math.min(delta, 0.05);
 
-        const turnSpeed = 1.65;
+        // Control de giro suave y sincronizado con Euler YXZ
+        const turnSpeed = 0.95;
         const leftFactor = typeof turnLeft === 'number' ? turnLeft : (turnLeft ? 1.0 : 0.0);
         const rightFactor = typeof turnRight === 'number' ? turnRight : (turnRight ? 1.0 : 0.0);
-        if (leftFactor > 0) camera.rotation.y += turnSpeed * leftFactor * dTime;
-        if (rightFactor > 0) camera.rotation.y -= turnSpeed * rightFactor * dTime;
-        camera.rotation.z = 0;
+
+        const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        euler.setFromQuaternion(camera.quaternion);
+        if (leftFactor > 0) euler.y += turnSpeed * leftFactor * dTime;
+        if (rightFactor > 0) euler.y -= turnSpeed * rightFactor * dTime;
+        euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, euler.x));
+        euler.z = 0;
+        camera.quaternion.setFromEuler(euler);
+        camera.rotation.copy(euler);
+        camera.updateMatrixWorld();
 
         velocity.z -= velocity.z * 10.0 * dTime;
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.normalize();
 
-        const moveSpeed = 70.0;
+        const moveSpeed = 55.0;
         const isMoving = moveForward || moveBackward;
         if (isMoving) velocity.z -= direction.z * moveSpeed * dTime;
 
+        const totalDisplacement = -velocity.z * dTime;
         const playerObj = controls.getObject ? controls.getObject() : camera;
 
-        controls.moveForward(-velocity.z * dTime);
+        if (Math.abs(totalDisplacement) > 1e-5) {
+            // Sub-stepping para evitar atravesar paredes incluso a altas velocidades o bajas tasas de cuadros
+            const maxStepSize = playerRadius * 0.3;
+            const subSteps = Math.max(1, Math.ceil(Math.abs(totalDisplacement) / maxStepSize));
+            const stepDist = totalDisplacement / subSteps;
 
-        const corrected = this.resolveCollisions(playerObj.position.x, playerObj.position.z, playerRadius);
-        playerObj.position.x = corrected.x;
-        playerObj.position.z = corrected.y;
+            for (let step = 0; step < subSteps; step++) {
+                controls.moveForward(stepDist);
+                const corrected = this.resolveCollisions(playerObj.position.x, playerObj.position.z, playerRadius);
+                playerObj.position.x = corrected.x;
+                playerObj.position.z = corrected.y;
+            }
+        } else {
+            const corrected = this.resolveCollisions(playerObj.position.x, playerObj.position.z, playerRadius);
+            playerObj.position.x = corrected.x;
+            playerObj.position.z = corrected.y;
+        }
     }
 }
 

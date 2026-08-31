@@ -95,7 +95,7 @@ export class VirtualDPad {
             const rect = base.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const maxRadius = (rect.width / 2) - 22;
+            const maxRadius = (rect.width / 2) - 18;
 
             let dx = clientX - centerX;
             let dy = clientY - centerY;
@@ -110,16 +110,24 @@ export class VirtualDPad {
 
             knob.style.transform = `translate(calc(-50% + ${clampedX}px), calc(-50% + ${clampedY}px))`;
 
-            const deadZone = 8;
+            const deadZone = 5;
             if (distance < deadZone) {
                 setMovement(false, false, 0, 0);
                 return;
             }
 
-            const forward = dy < -10;
-            const backward = dy > 10;
-            const leftRatio = dx < -8 ? Math.min(Math.abs(dx) / maxRadius, 1.0) : 0;
-            const rightRatio = dx > 8 ? Math.min(Math.abs(dx) / maxRadius, 1.0) : 0;
+            const forward = dy < -7;
+            const backward = dy > 7;
+
+            // Curva suave progresiva para giro horizontal analógico
+            const normX = clampedX / maxRadius;
+            let leftRatio = 0;
+            let rightRatio = 0;
+            if (normX < -0.10) {
+                leftRatio = Math.pow(Math.abs(normX), 1.3);
+            } else if (normX > 0.10) {
+                rightRatio = Math.pow(normX, 1.3);
+            }
 
             setMovement(forward, backward, leftRatio, rightRatio);
         };
@@ -127,7 +135,7 @@ export class VirtualDPad {
         const resetKnob = () => {
             activePointerId = null;
             knob.style.transform = 'translate(-50%, -50%)';
-            setMovement(false, false, false, false);
+            setMovement(false, false, 0, 0);
         };
 
         base.addEventListener('pointerdown', (e) => {

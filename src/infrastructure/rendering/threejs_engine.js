@@ -193,13 +193,15 @@ class ThreeJSEngine {
                     prevTouchX = touch.clientX;
                     prevTouchY = touch.clientY;
 
-                    const sensitivity = 0.0024;
+                    const sensitivity = 0.0020;
                     lookEuler.setFromQuaternion(this.camera.quaternion);
                     lookEuler.y -= deltaX * sensitivity;
                     lookEuler.x -= deltaY * sensitivity;
                     lookEuler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, lookEuler.x));
                     lookEuler.z = 0;
                     this.camera.quaternion.setFromEuler(lookEuler);
+                    this.camera.rotation.copy(lookEuler);
+                    this.camera.updateMatrixWorld();
                     break;
                 }
             }
