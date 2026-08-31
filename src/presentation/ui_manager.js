@@ -211,7 +211,7 @@ export class UIManager {
     }
 
     async syncGallery({ isInitial = false, onComplete = null } = {}) {
-        this.showLoading('Buscando galery.json en el servidor...');
+        this.showLoading('Cargando Galería...');
         try {
             let res = await fetch('galery.json');
             if (!res.ok) {
@@ -246,13 +246,26 @@ export class UIManager {
                 if (onComplete) onComplete(false);
                 return false;
             }
+
+            // Cuando no hay galería previa (arranque inicial), se importa directamente sin diálogo de confirmación
+            if (isInitial) {
+                try {
+                    await this.state.importGallery(text);
+                    this.hideLoading();
+                    if (onComplete) onComplete(true);
+                    return true;
+                } catch (err) {
+                    this.hideLoading();
+                    if (onComplete) onComplete(false);
+                    return false;
+                }
+            }
+
             this.hideLoading();
 
             const roomsCount = parsed.rooms.length;
             const galleryName = parsed.name || 'Galería';
-            const question = isInitial
-                ? `Se detectó el archivo de galería "${galleryName}" con ${roomsCount} salón(es) en el servidor. ¿Deseas importar esta galería para comenzar?`
-                : `Se validó el archivo "${galleryName}" con ${roomsCount} salón(es). ¿Deseas reemplazar la galería actual con estos datos?`;
+            const question = `Se validó el archivo "${galleryName}" con ${roomsCount} salón(es). ¿Deseas reemplazar la galería actual con estos datos?`;
 
             this.showConfirmDialog(
                 question,
