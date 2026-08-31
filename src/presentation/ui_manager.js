@@ -126,6 +126,7 @@ export class UIManager {
     }
 
     renderStartScreen() {
+        this.engine.isSpectatorActive = false;
         const crosshair = document.getElementById('crosshair');
         if (crosshair) crosshair.style.display = 'none';
 
@@ -158,6 +159,7 @@ export class UIManager {
     }
 
     renderEditor() {
+        this.engine.isSpectatorActive = false;
         const crosshair = document.getElementById('crosshair');
         if (crosshair) crosshair.style.display = 'none';
 
@@ -333,11 +335,11 @@ export class UIManager {
         if (data && descText.length > 0) {
             const descEl = document.getElementById('hud-desc');
             if (descEl) descEl.innerText = descText;
-            hud.classList.remove('opacity-0', 'translate-y-4');
+            hud.classList.remove('opacity-0', 'translate-y-4', '-translate-y-3');
             hud.classList.add('opacity-100', 'translate-y-0');
         } else {
             hud.classList.remove('opacity-100', 'translate-y-0');
-            hud.classList.add('opacity-0', 'translate-y-4');
+            hud.classList.add('opacity-0');
         }
     }
 

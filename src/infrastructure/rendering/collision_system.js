@@ -204,9 +204,11 @@ class CollisionSystem {
     updateMovement({ camera, controls, velocity, direction, moveForward, moveBackward, turnLeft, turnRight, delta, playerRadius }) {
         const dTime = Math.min(delta, 0.1);
 
-        const turnSpeed = 2.8;
-        if (turnLeft) camera.rotation.y += turnSpeed * dTime;
-        if (turnRight) camera.rotation.y -= turnSpeed * dTime;
+        const turnSpeed = 1.65;
+        const leftFactor = typeof turnLeft === 'number' ? turnLeft : (turnLeft ? 1.0 : 0.0);
+        const rightFactor = typeof turnRight === 'number' ? turnRight : (turnRight ? 1.0 : 0.0);
+        if (leftFactor > 0) camera.rotation.y += turnSpeed * leftFactor * dTime;
+        if (rightFactor > 0) camera.rotation.y -= turnSpeed * rightFactor * dTime;
         camera.rotation.z = 0;
 
         velocity.z -= velocity.z * 10.0 * dTime;

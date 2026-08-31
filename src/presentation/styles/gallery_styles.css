@@ -175,14 +175,14 @@ body, html {
 
 #minimap-container {
     position: absolute;
-    bottom: 24px;
-    left: 24px;
-    width: 200px;
-    height: 200px;
-    background: rgba(15, 23, 42, 0.45);
+    bottom: 16px;
+    left: 16px;
+    width: 116px;
+    height: 116px;
+    background: rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: 20;
@@ -191,17 +191,40 @@ body, html {
     display: none;
 }
 
+#minimap-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 #minimap-header {
     position: absolute;
-    top: 8px;
-    left: 12px;
-    font-size: 9px;
+    top: 6px;
+    left: 8px;
+    font-size: 7px;
     font-weight: 800;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.75);
     pointer-events: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 640px) {
+    #minimap-container {
+        bottom: 24px;
+        left: 24px;
+        width: 180px;
+        height: 180px;
+        border-radius: 18px;
+    }
+
+    #minimap-header {
+        top: 8px;
+        left: 12px;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+    }
 }
 
 /* --- Controles UI Personalizados --- */
@@ -325,4 +348,31 @@ body, html {
 
 .hidden {
     display: none !important;
+}
+
+/* --- Cruceta / Palanca Virtual Táctil --- */
+
+#virtual-dpad-container {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+.dpad-direction-btn {
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dpad-direction-btn.dpad-btn-active {
+    background: rgba(250, 204, 21, 0.4) !important;
+    border-color: rgba(250, 204, 21, 0.95) !important;
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.6) !important;
+}
+
+.dpad-direction-btn.dpad-btn-active svg {
+    color: #ffffff !important;
+    filter: drop-shadow(0 0 8px #facc15);
+}
+
+.dpad-direction-btn.dpad-btn-active span {
+    color: #ffffff !important;
 }

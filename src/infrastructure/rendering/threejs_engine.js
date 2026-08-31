@@ -87,6 +87,7 @@ class ThreeJSEngine {
         this.roomAudioElements = {};
         this.roomAudioVolume = 0.5;
 
+        this.isSpectatorActive = false;
         this.setupEventListeners();
         this.animate();
     }
@@ -110,7 +111,7 @@ class ThreeJSEngine {
     }
 
     /**
-     * Configura los listeners de teclado y redimensionamiento.
+     * Configura los listeners de teclado, táctiles y redimensionamiento.
      * @returns {void}
      */
     setupEventListeners() {
@@ -159,6 +160,66 @@ class ThreeJSEngine {
         document.addEventListener('keydown', onKeyDown);
         document.addEventListener('keyup', onKeyUp);
 
+        // Control de orientación y vista por deslizamiento táctil (Touch Look)
+        let touchLookId = null;
+        let prevTouchX = 0;
+        let prevTouchY = 0;
+        const lookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        const onTouchStart = (e) => {
+            if (!this.isSpectatorActive && !this.controls.isLocked) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.closest('button, input, textarea, select, a, label, #modal-container, #virtual-dpad-container, #minimap-container')) {
+                    continue;
+                }
+                if (touchLookId === null) {
+                    touchLookId = touch.identifier;
+                    prevTouchX = touch.clientX;
+                    prevTouchY = touch.clientY;
+                    break;
+                }
+            }
+        };
+
+        const onTouchMove = (e) => {
+            if (touchLookId === null) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === touchLookId) {
+                    const deltaX = touch.clientX - prevTouchX;
+                    const deltaY = touch.clientY - prevTouchY;
+                    prevTouchX = touch.clientX;
+                    prevTouchY = touch.clientY;
+
+                    const sensitivity = 0.0024;
+                    lookEuler.setFromQuaternion(this.camera.quaternion);
+                    lookEuler.y -= deltaX * sensitivity;
+                    lookEuler.x -= deltaY * sensitivity;
+                    lookEuler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, lookEuler.x));
+                    lookEuler.z = 0;
+                    this.camera.quaternion.setFromEuler(lookEuler);
+                    break;
+                }
+            }
+        };
+
+        const onTouchEnd = (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === touchLookId) {
+                    touchLookId = null;
+                    break;
+                }
+            }
+        };
+
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+        window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
@@ -171,7 +232,7 @@ class ThreeJSEngine {
         });
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('button, input, textarea, select, a, label, #modal-container')) {
+            if (e.target.closest('button, input, textarea, select, a, label, #modal-container, #virtual-dpad-container')) {
                 return;
             }
 
@@ -183,7 +244,10 @@ class ThreeJSEngine {
                     if (minimap && minimap.style.display !== 'none') {
                         const overlay = document.getElementById('click-to-play-overlay');
                         if (overlay) overlay.style.display = 'none';
-                        this.controls.lock();
+                        this.isSpectatorActive = true;
+                        try {
+                            this.controls.lock();
+                        } catch (err) {}
                     }
                 }
             }
@@ -350,7 +414,8 @@ class ThreeJSEngine {
             }
         });
 
-        if (this.controls.isLocked) {
+        const canMove = this.controls.isLocked || this.isSpectatorActive;
+        if (canMove) {
             this.collisionSystem.updateMovement({
                 camera: this.camera,
                 controls: this.controls,
