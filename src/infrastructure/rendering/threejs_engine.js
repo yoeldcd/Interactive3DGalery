@@ -32,9 +32,13 @@ class ThreeJSEngine {
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             powerPreference: 'high-performance',
-            precision: 'highp'
+            precision: 'highp',
+            powerPreference: 'high-performance'
         });
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+        const maxDpr = isMobile ? 1.25 : 1.75;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDpr));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = false;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -223,6 +227,9 @@ class ThreeJSEngine {
         window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
         window.addEventListener('resize', () => {
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+            const maxDpr = isMobile ? 1.25 : 1.75;
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDpr));
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -455,7 +462,8 @@ class ThreeJSEngine {
 
         this.raycasterManager.update(this.camera, this.onLookAtPicture);
 
-        if (time - this.lastMinimapUpdate > 33) {
+        const minimapInterval = (navigator.maxTouchPoints > 0) ? 66 : 33;
+        if (time - this.lastMinimapUpdate > minimapInterval) {
             this.renderMinimap();
             this.lastMinimapUpdate = time;
         }

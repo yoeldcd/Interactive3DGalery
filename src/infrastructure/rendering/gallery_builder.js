@@ -792,6 +792,9 @@ buildPictureOnWall(picData, wallMesh, maxWallWidth, hallHeight, wallNumber, wall
         picData.src,
         (tex) => {
             tex.colorSpace = THREE.SRGBColorSpace;
+            tex.generateMipmaps = true;
+            tex.minFilter = THREE.LinearMipmapLinearFilter;
+            tex.magFilter = THREE.LinearFilter;
             tex.needsUpdate = true;
             picMat.map = tex;
             picMat.needsUpdate = true;

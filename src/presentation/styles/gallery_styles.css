@@ -376,3 +376,13 @@ body, html {
 .dpad-direction-btn.dpad-btn-active span {
     color: #ffffff !important;
 }
+
+/* --- Optimizaciones de rendimiento para GPU móvil --- */
+@media (max-width: 640px), (hover: none) {
+    #info-hud,
+    #minimap-container,
+    #dpad-base {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
